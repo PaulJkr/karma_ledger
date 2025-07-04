@@ -34,7 +34,7 @@ export class KarmaEventService {
   async getUserKarmaScore(userId: string) {
     const result = await this.karmaEventModel.findAll({
       attributes: [
-        [Sequelize.fn('SUM', Sequelize.col('intensity')), 'totalKarma'],
+        [Sequelize.fn('AVG', Sequelize.col('intensity')), 'totalKarma'],
       ],
       where: { user_id: userId },
     });
@@ -44,5 +44,16 @@ export class KarmaEventService {
     }
 
     return result[0].get('totalKarma');
+  }
+
+  async updateKarmaEvent(
+    eventId: string,
+    updateData: Partial<KarmaEvent>,
+  ): Promise<KarmaEvent> {
+    const event = await this.karmaEventModel.findByPk(eventId);
+    if (!event) {
+      throw new Error(`Karma event with ID ${eventId} not found`);
+    }
+    return event.update(updateData);
   }
 }

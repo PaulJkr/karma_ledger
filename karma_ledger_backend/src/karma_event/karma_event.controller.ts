@@ -5,11 +5,14 @@ import {
   UseGuards,
   Request,
   Body,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateKarmaEventDto } from './dto/event.dto';
 import { KarmaEventService } from './karma_event.service';
 import { AuthenticatedRequest } from 'src/util/types';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { handleError } from 'src/util/error';
 @Controller('karma-events')
 @UseGuards(JwtAuthGuard)
 export class KarmaEventController {
@@ -20,16 +23,51 @@ export class KarmaEventController {
     @Body() dto: CreateKarmaEventDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.karmaEventService.createEvent(dto, req.user?.user_id ?? '');
+    try {
+      return this.karmaEventService.createEvent(dto, req.user?.user_id ?? '');
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: handleError(error),
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Get('me')
   getUserEvents(@Request() req: AuthenticatedRequest) {
-    return this.karmaEventService.findUserEvents(req.user?.user_id ?? '');
+    try {
+      return this.karmaEventService.findUserEvents(req.user?.user_id ?? '');
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: handleError(error),
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Get('me/score')
   getUserKarmaScore(@Request() req: AuthenticatedRequest) {
-    return this.karmaEventService.getUserKarmaScore(req.user?.user_id ?? '');
+    try {
+      const results = this.karmaEventService.getUserKarmaScore(
+        req.user?.user_id ?? '',
+      );
+      return {
+        total_score: results,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: handleError(error),
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

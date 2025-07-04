@@ -35,6 +35,12 @@ export class KarmaEvent extends Model {
   @BelongsTo(() => User)
   user: User;
 
+  @Column(DataType.TEXT)
+  feedback: string; // AI-generated feedback based on action
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  feedback_generated: boolean;
+
   @Default(DataType.NOW)
   @Column(DataType.DATE)
   occurred_at: Date;

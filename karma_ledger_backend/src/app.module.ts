@@ -7,10 +7,18 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { KarmaEventModule } from './karma_event/karma_event.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     SequelizeModule.forRoot(dbConfig),
+    BullModule.forRoot({
+      // Global configuration for BullMQ
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     UsersModule,
     AuthModule,
     ConfigModule.forRoot({
