@@ -22,12 +22,23 @@ export class AuthService {
     if (!user || !(await verifyPassword(passwd, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return user;
+
+    const { user_id, username } = user;
+    return { user_id, email: user.email, username };
   }
 
   async login(user: PublicUserData) {
-    const payload = { sub: user.user_id, email: user.email };
+    const payload = {
+      sub: user.user_id,
+      email: user.email,
+      username: user.username,
+    };
+
     const token = await this.jwtService.signAsync(payload);
-    return { message: 'login succesful', access_token: token };
+
+    return {
+      message: 'Login successful',
+      access_token: token,
+    };
   }
 }

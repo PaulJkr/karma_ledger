@@ -3,13 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 interface JwtPayload {
-  sub: {
-    user: { user_id: string };
-  };
+  sub: string;
   email: string;
+  [key: string]: any;
 }
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
@@ -22,6 +21,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    return { userId: payload.sub.user.user_id, email: payload.email };
+    return { user_id: payload.sub, email: payload.email };
   }
 }

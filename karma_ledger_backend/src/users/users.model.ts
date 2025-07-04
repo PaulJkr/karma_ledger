@@ -6,6 +6,8 @@ import {
   PrimaryKey,
   Default,
 } from 'sequelize-typescript';
+import { KarmaEvent } from 'src/karma_event/karma_event.model';
+import { HasMany } from 'sequelize-typescript';
 
 @Table({ tableName: 'users', timestamps: true })
 export class User extends Model {
@@ -22,4 +24,7 @@ export class User extends Model {
 
   @Column
   password: string;
+
+  @HasMany(() => KarmaEvent)
+  karmaEvents: KarmaEvent[];
 }
