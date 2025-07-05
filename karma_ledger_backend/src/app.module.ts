@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { KarmaEventModule } from './karma_event/karma_event.module';
 import { BullModule } from '@nestjs/bullmq';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { BullModule } from '@nestjs/bullmq';
       ignoreEnvFile: false, // Set to true if you want to ignore the .env
     }),
     KarmaEventModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
