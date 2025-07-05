@@ -11,6 +11,7 @@ import {
   CountTokensResponse,
 } from '@google/generative-ai';
 import { handleError } from 'src/util/error';
+import { KarmaEvent } from './karma_event.model';
 
 interface KarmaActionJobData {
   userId: string;
@@ -201,5 +202,84 @@ export class AiService {
     };
     const { totalTokens } = await this.generativeModel.countTokens(request);
     return { totalTokens };
+  }
+
+  async generateWeeklySuggestions(
+    userId: string,
+    events: KarmaEvent[],
+  ): Promise<string[]> {
+    this.logger.log(
+      `Generating weekly suggestions for user ${userId} with events ${events.length}`,
+    );
+
+    if (!events || events.length === 0) {
+      this.logger.warn(
+        `No recent actions for user ${userId}, returning generic suggestions.`,
+      );
+      return [
+        'Initiate a new community support activity.',
+        'Mentor a peer who needs help.',
+        'Reflect on one habit you can improve next week.',
+      ];
+    }
+
+    const formattedActions = events
+      .map(
+        (event, idx) =>
+          `(${idx + 1}) ${event.action} [intensity: ${event.intensity}]`,
+      )
+      .join('\n');
+
+    const prompt = `
+Act as a Karma Growth Coach for a Karma Ledger app user. Analyze these recent karma actions:
+${formattedActions}
+
+Generate 3 personalized suggestions for the coming week that will:
+1. Challenge them beyond their current comfort zone
+2. Align with but expand upon their demonstrated values/interests
+3. Create meaningful social or personal impact
+
+Requirements for each suggestion:
+- Begin with an action verb
+- Be specific and measurable
+- Target different life domains (social, professional, personal growth)
+- Include an implicit challenge to level up
+- Avoid repeating previous action types
+- Use an encouraging but direct tone
+
+Response format: ONLY a JSON array of 3 strings, like:
+[
+  "Initiate a conversation with 3 strangers at your weekly meetup",
+  "Dedicate 2 hours to volunteer work outside your usual causes",
+  "Replace 30 minutes of social media with skill-building daily"
+]
+
+Focus on creating suggestions that feel both authentic to their journey and slightly uncomfortable to attempt.
+`;
+
+    try {
+      const result = await this.generativeModel.generateContent(prompt);
+      const responseText = result.response.text().trim();
+
+      this.logger.debug(`Gemini raw weekly suggestion output: ${responseText}`);
+
+      const suggestions = JSON.parse(responseText);
+      if (!Array.isArray(suggestions)) {
+        throw new Error(
+          'Gemini did not return a valid JSON array of suggestions.',
+        );
+      }
+
+      return suggestions.slice(0, 3); // limit to 3
+    } catch (err) {
+      this.logger.error(
+        `Failed to generate weekly suggestions: ${handleError(err)}`,
+      );
+      return [
+        'Volunteer for a cause you care about',
+        'Help a friend with a task',
+        'Give positive feedback to someone',
+      ];
+    }
   }
 }
