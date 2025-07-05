@@ -31,6 +31,7 @@ export class KarmaFeedbackProcessor extends WorkerHost {
         karmaEventId,
         action,
       });
+      this.logger.log(`event id was ${karmaEventId}`);
       await this.karmaService.updateKarmaEvent(karmaEventId, processedData);
     } catch (error) {
       this.logger.error(

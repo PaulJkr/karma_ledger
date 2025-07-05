@@ -3,25 +3,32 @@ import { KarmaEvent } from './karma_event.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateKarmaEventDto } from './dto/event.dto';
 import { Sequelize } from 'sequelize-typescript';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { QueueNames } from 'src/config/queues';
 
 @Injectable()
 export class KarmaEventService {
   constructor(
     @InjectModel(KarmaEvent) private karmaEventModel: typeof KarmaEvent,
+    @InjectQueue(QueueNames.KARMA_FEEDBACK) private karmaFeedbackQueue: Queue,
   ) {}
 
   async createEvent(
     dto: CreateKarmaEventDto,
     userId: string,
   ): Promise<KarmaEvent> {
-    const intensity = 5;
-
-    return this.karmaEventModel.create({
+    const results = await this.karmaEventModel.create({
       ...dto,
       user_id: userId,
-      intensity: intensity,
       occurred_at: dto.occurred_at || new Date(),
     });
+    await this.karmaFeedbackQueue.add('get_feedback', {
+      userId,
+      karmaEventId: results.event_id,
+      action: results.action,
+    });
+    return results;
   }
 
   async findUserEvents(userId: string): Promise<KarmaEvent[]> {
@@ -31,19 +38,26 @@ export class KarmaEventService {
     });
   }
 
-  async getUserKarmaScore(userId: string) {
-    const result = await this.karmaEventModel.findAll({
+  async getUserKarmaScore(userId: string): Promise<number> {
+    const MIN_INTENSITY = -1;
+    const MAX_INTENSITY = 10;
+    const results = await this.karmaEventModel.findAll({
       attributes: [
-        [Sequelize.fn('AVG', Sequelize.col('intensity')), 'totalKarma'],
+        [Sequelize.fn('AVG', Sequelize.col('intensity')), 'averageIntensity'],
       ],
+      group: ['user_id'],
       where: { user_id: userId },
     });
+    const firstResult = results[0];
+    const averageIntensity = firstResult?.get('averageIntensity');
 
-    if (result.length === 0 || !result[0].get('totalKarma')) {
-      return 0;
-    }
+    if (averageIntensity === undefined || averageIntensity === null) return 0;
 
-    return result[0].get('totalKarma');
+    // Normalize to percentage
+    const normalized =
+      (Number(averageIntensity) - MIN_INTENSITY) /
+      (MAX_INTENSITY - MIN_INTENSITY);
+    return Math.round(normalized * 100);
   }
 
   async updateKarmaEvent(

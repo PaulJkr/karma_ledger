@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { dbConfig } from './db/sequelize.config';
+import { dbConfig } from './config/sequelize.config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -16,7 +16,7 @@ import { BullModule } from '@nestjs/bullmq';
       // Global configuration for BullMQ
       connection: {
         host: 'localhost',
-        port: 6379,
+        port: 5000,
       },
     }),
     UsersModule,

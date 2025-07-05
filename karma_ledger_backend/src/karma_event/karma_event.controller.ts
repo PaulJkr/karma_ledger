@@ -52,13 +52,13 @@ export class KarmaEventController {
   }
 
   @Get('me/score')
-  getUserKarmaScore(@Request() req: AuthenticatedRequest) {
+  async getUserKarmaScore(@Request() req: AuthenticatedRequest) {
     try {
-      const results = this.karmaEventService.getUserKarmaScore(
+      const results = await this.karmaEventService.getUserKarmaScore(
         req.user?.user_id ?? '',
       );
       return {
-        total_score: results,
+        total_percentage: `${`${results}`}%`, //results,
       };
     } catch (error) {
       throw new HttpException(

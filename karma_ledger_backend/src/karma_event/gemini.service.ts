@@ -78,20 +78,21 @@ export class AiService {
   private generateKarmaPrompt(data: KarmaActionJobData): string {
     return `
       You are an AI assistant for a "Karma Ledger" application. Your goal is to analyze a user's action and provide two pieces of information:
-      1. An "intensityScore" on a numerical scale from -10 to +10.
-         - +10 indicates an extremely positive karma action (e.g., saving a life, major philanthropic act).
-         - +5 indicates a moderately positive karma action (e.g., helping a friend, volunteering).
-         - 0 indicates a neutral action (e.g., eating lunch, sleeping, routine tasks).
-         - -5 indicates a moderately negative karma action (e.g., minor argument, procrastination).
-         - -10 indicates an extremely negative karma action (e.g., serious harm, major deception).
+      1. An "intensityScore" on a numerical scale from -1 to +10.
+         - +10: An extremely positive karma action (e.g., saving a life, major philanthropic act).
+         - +7: A very positive action (e.g., organizing a charity event, helping a stranger in need).
+         - +5: A moderately positive action (e.g., helping a friend, volunteering, resolving a conflict peacefully).
+         - +2: A slightly positive action (e.g., complimenting someone, recycling, small acts of kindness).
+         - 0: A neutral action (e.g., eating lunch, routine work, daily chores).
+         - -1: A negative action (e.g., being rude, breaking a promise, minor dishonesty).
       2. A concise, encouraging, and personalized "feedbackMessage" to the user, reflecting on the action's impact and its intensity.
          - Keep the feedback positive, even for negative karma, focusing on learning or future improvement.
-
+  
       Consider the following user action: "${data.action}"
-
+  
       Your output MUST be a valid JSON object with the following structure:
       {
-        "intensityScore": [integer between -10 and 10],
+        "intensityScore": [integer between -1 and 10],
         "feedbackMessage": "[string, a concise and personalized feedback message]"
       }
       Do NOT include any other text or formatting outside the JSON object.
