@@ -1,4 +1,3 @@
-// src/badges/badge.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UserBadge } from 'src/users/models/user_badges.model';
