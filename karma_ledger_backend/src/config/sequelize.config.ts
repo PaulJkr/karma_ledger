@@ -17,6 +17,12 @@ export const getSequelizeConfig = (
       autoLoadModels: true,
       synchronize: true,
       logging: false,
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
     };
   }
 

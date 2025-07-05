@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 1. The NestJS Application Service
+  backend:
+    container_name: karma_backend_app
+    build:
+      context: . # Use the Dockerfile in the current directory
+      dockerfile: Dockerfile
+    ports:
+      # Map the container's port 3000 to the host machine's port 3000
+      - "3000:3000"
+    environment:
+      # --- Application Configuration ---
+      - PORT=3000
+      - SERVER_URL=http://localhost:3000
+
+      # --- Database Configuration (for Sequelize) ---
+      # For now, we'll keep using SQLite inside the container.
+      - DB_DIALECT=sqlite
+      - DB_STORAGE=db.sqlite # The DB will live inside the container's filesystem
+      - NODE_ENV=${NODE_ENV}
+      
+      # --- Database Connection Details ---
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      # --- Redis/BullMQ Configuration ---
+      # IMPORTANT: We use the service name 'redis', not 'localhost'
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+      # --- Security & Auth Configuration ---
+      - JWT_SECRET=c2VjdXJlLWp3dC1zZWNyZXQtZm9yLW15LWFwcGxpY2F0aW9uLTIwMjQ=
+      - JWT_EXPIRES_IN=1d
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+
+    volumes:
+      # This line persists the SQLite database file on your host machine.
+      # It maps the 'db.sqlite' file inside the container to a 'db' folder on your host.
+      - ./db.sqlite:/usr/src/app/db.sqlite
+    depends_on:
+      - redis # Tells Docker to start the 'redis' service before starting the 'backend' service
+    networks:
+      - karma-network
+
+  # 2. The Redis Service for BullMQ
+  redis:
+    container_name: karma_redis
+    image: "redis:7-alpine" # Use a specific, lightweight Redis image
+    ports:
+      # You can optionally expose the Redis port to your host machine for debugging
+      # with tools like Redis Insight. For production, you might remove this.
+      - "6379:6379"
+    volumes:
+      # This persists Redis data on your host machine, so your queues and jobs
+      # are not lost if the container restarts.
+      - redis-data:/data
+    networks:
+      - karma-network
+
+# Define the network that allows containers to communicate
+networks:
+  karma-network:
+    driver: bridge
+
+# Define the volumes for data persistence
+volumes:
+  redis-data:
+    driver: local

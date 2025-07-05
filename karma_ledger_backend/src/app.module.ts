@@ -20,12 +20,16 @@ import { ConfigService } from '@nestjs/config';
       useFactory: (configService: ConfigService) =>
         getSequelizeConfig(configService),
     }),
-    BullModule.forRoot({
+    BullModule.forRootAsync({
       // Global configuration for BullMQ
-      connection: {
-        host: 'localhost',
-        port: 5000,
-      },
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+        },
+      }),
     }),
     EventEmitterModule.forRoot(), // for listening to events
     UsersModule,
