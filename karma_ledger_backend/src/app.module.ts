@@ -21,15 +21,25 @@ import { ConfigService } from '@nestjs/config';
         getSequelizeConfig(configService),
     }),
     BullModule.forRootAsync({
-      // Global configuration for BullMQ
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
+
+        return {
+          connection: isProduction
+            ? {
+                // Redis Cloud: Use the full URL (e.g. redis://default:password@host:port)
+                url: configService.get<string>('REDIS_URL'),
+              }
+            : {
+                // Local Redis for development
+                host: configService.get<string>('REDIS_HOST', 'localhost'),
+                port: configService.get<number>('REDIS_PORT', 6379),
+              },
+        };
+      },
     }),
     EventEmitterModule.forRoot(), // for listening to events
     UsersModule,
