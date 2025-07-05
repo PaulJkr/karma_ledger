@@ -8,7 +8,7 @@ import {
   BelongsTo,
   Default,
 } from 'sequelize-typescript';
-import { User } from 'src/users/users.model';
+import { User } from 'src/users/models/users.model';
 @Table({ tableName: 'karma_suggestions', timestamps: true })
 export class Suggestion extends Model {
   @PrimaryKey

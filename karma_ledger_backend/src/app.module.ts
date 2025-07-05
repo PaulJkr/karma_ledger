@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { dbConfig } from './config/sequelize.config';
+import { getSequelizeConfig } from './config/sequelize.config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -9,10 +9,17 @@ import { ConfigModule } from '@nestjs/config';
 import { KarmaEventModule } from './karma_event/karma_event.module';
 import { BullModule } from '@nestjs/bullmq';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    SequelizeModule.forRoot(dbConfig),
+    SequelizeModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        getSequelizeConfig(configService),
+    }),
     BullModule.forRoot({
       // Global configuration for BullMQ
       connection: {
@@ -20,6 +27,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
         port: 5000,
       },
     }),
+    EventEmitterModule.forRoot(), // for listening to events
     UsersModule,
     AuthModule,
     ConfigModule.forRoot({

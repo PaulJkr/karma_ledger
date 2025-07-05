@@ -11,7 +11,7 @@ import {
   CountTokensResponse,
 } from '@google/generative-ai';
 import { handleError } from 'src/util/error';
-import { KarmaEvent } from './karma_event.model';
+import { KarmaEvent } from './models/karma_event.model';
 
 interface KarmaActionJobData {
   userId: string;
