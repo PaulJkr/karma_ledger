@@ -22,4 +22,9 @@ export class DashboardController {
   async getSuggestions(@Request() req: AuthenticatedRequest) {
     return this.DashboardService.getSuggestions(req.user?.user_id ?? '');
   }
+
+  @Get('/karma-scores')
+  async getKarmaScores(@Request() req: AuthenticatedRequest) {
+    return this.DashboardService.getWeeklyKarmaScores(req.user?.user_id ?? '');
+  }
 }
