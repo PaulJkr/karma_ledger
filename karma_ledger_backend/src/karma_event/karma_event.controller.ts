@@ -13,7 +13,9 @@ import { KarmaEventService } from './karma_event.service';
 import { AuthenticatedRequest } from 'src/util/types';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { handleError } from 'src/util/error';
+import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('karma-events')
+@ApiBearerAuth('JWT')
 @UseGuards(JwtAuthGuard)
 export class KarmaEventController {
   constructor(private readonly karmaEventService: KarmaEventService) {}
