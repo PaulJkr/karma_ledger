@@ -6,8 +6,9 @@ import {
   PrimaryKey,
   Default,
 } from 'sequelize-typescript';
-import { KarmaEvent } from 'src/karma_event/karma_event.model';
+import { KarmaEvent } from 'src/karma_event/models/karma_event.model';
 import { HasMany } from 'sequelize-typescript';
+import { UserBadge } from './user_badges.model';
 
 @Table({ tableName: 'users', timestamps: true })
 export class User extends Model {
@@ -27,4 +28,7 @@ export class User extends Model {
 
   @HasMany(() => KarmaEvent)
   karmaEvents: KarmaEvent[];
+
+  @HasMany(() => UserBadge)
+  badges: UserBadge[];
 }

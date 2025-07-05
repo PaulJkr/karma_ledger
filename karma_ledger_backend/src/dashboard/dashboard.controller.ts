@@ -4,6 +4,8 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AuthenticatedRequest } from 'src/util/types';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { handleError } from 'src/util/error';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT')
@@ -26,5 +28,32 @@ export class DashboardController {
   @Get('/karma-scores')
   async getKarmaScores(@Request() req: AuthenticatedRequest) {
     return this.DashboardService.getWeeklyKarmaScores(req.user?.user_id ?? '');
+  }
+
+  @Get('/leaderboard')
+  async leaderBoardStats() {
+    try {
+      return this.DashboardService.getWeeklyLeaderboard();
+    } catch (error) {
+      throw new HttpException(handleError(error), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('/badges')
+  async getAllBadges() {
+    try {
+      return this.DashboardService.getAllBadges();
+    } catch (error) {
+      throw new HttpException(handleError(error), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('badges/me')
+  async getUserBadges(@Request() req: AuthenticatedRequest) {
+    try {
+      return this.DashboardService.getUserBadges(req.user?.user_id ?? '');
+    } catch (error) {
+      throw new HttpException(handleError(error), HttpStatus.BAD_REQUEST);
+    }
   }
 }

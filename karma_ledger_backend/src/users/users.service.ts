@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from './users.model';
+import { User } from './models/users.model';
 import { CreateUserDto } from './dto/createUser';
 import { hashPassword } from 'src/util/password';
 import { handleError } from 'src/util/error';
+import { UserBadge } from './models/user_badges.model';
+import { Badge } from 'src/dashboard/models/badge.model';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +33,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.userModel.findAll({
+      include: [{ model: UserBadge, as: 'badges', include: [Badge] }],
       attributes: { exclude: ['password'] },
       order: [['createdAt', 'DESC']],
     });

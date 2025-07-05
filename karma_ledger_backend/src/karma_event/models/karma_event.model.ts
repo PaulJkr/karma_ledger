@@ -10,7 +10,7 @@ import {
   Default,
   BelongsTo,
 } from 'sequelize-typescript';
-import { User } from '../users/users.model';
+import { User } from '../../users/models/users.model';
 
 @Table({ tableName: 'karma_events', timestamps: true })
 export class KarmaEvent extends Model {
